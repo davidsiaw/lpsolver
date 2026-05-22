@@ -17,6 +17,9 @@ jobs:
       with:
         ruby-version: '3.4'
         bundler-cache: true
+    - name: Install HiGHS solver
+      run: |
+        sudo apt-get update -qq && sudo apt-get install -y -qq highs
     - name: Build documentation
       run: bundle exec yard
     - name: Upload documentation
