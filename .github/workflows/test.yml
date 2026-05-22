@@ -34,12 +34,21 @@ jobs:
         bundler-cache: true
     - name: Install HiGHS solver
       run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          sudo apt-get update -qq && sudo apt-get install -y -qq highs
-        elif [ "$RUNNER_OS" == "macOS" ]; then
-          brew install highs
+        echo "Platform: ${{ matrix.os }}, Ruby: ${{ matrix.ruby }}"
+        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+          # Download precompiled binary from GitHub releases
+          wget -q "https://github.com/ERGO-Code/HiGHS/releases/download/v1.14.0/highs-1.14.0-x86_64-linux-gnu-static-mit.tar.gz" -O /tmp/highs.tar.gz
+          tar xzf /tmp/highs.tar.gz -C /tmp/
+          sudo cp /tmp/highs-1.14.0-x86_64-linux-gnu-static-mit/bin/highs /usr/local/bin/highs
+          sudo chmod +x /usr/local/bin/highs
+        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+          # Download precompiled binary from GitHub releases (ARM64 for latest macOS runners)
+          wget -q "https://github.com/ERGO-Code/HiGHS/releases/download/v1.14.0/highs-1.14.0-arm-apple-static-mit.tar.gz" -O /tmp/highs.tar.gz
+          tar xzf /tmp/highs.tar.gz -C /tmp/
+          sudo cp /tmp/highs-1.14.0-arm-apple-static-mit/bin/highs /usr/local/bin/highs
+          sudo chmod +x /usr/local/bin/highs
         fi
-        echo "highs version: $(highs --version 2>&1 || highs --help 2>&1 | head -1)"
+        echo "HiGHS installed: $(highs --version 2>&1 || highs --help 2>&1 | head -1)"
     - name: Run examples
       run: |
         ruby -Ilib examples/coin_purse.rb
