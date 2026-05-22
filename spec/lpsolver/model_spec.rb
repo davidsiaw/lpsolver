@@ -338,4 +338,115 @@ RSpec.describe LpSolver::Model do
       expect(lp).to include('1 x + 2 y >= 8')
     end
   end
+
+  describe 'variable extraction' do
+    it 'returns all variables defined in the model' do
+      model = LpSolver::Model.new('vars_test')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+      z = model.add_variable(:z, lb: 0)
+
+      vars = model.variables
+      expect(vars[:x]).to eql(x)
+      expect(vars[:y]).to eql(y)
+      expect(vars[:z]).to eql(z)
+      expect(vars.keys).to eq([:x, :y, :z])
+    end
+
+    it 'allows accessing solution values by Variable object' do
+      model = LpSolver::Model.new('var_access')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      model.add_constraint(:c1, (x + y) >= 4)
+      model.minimize
+      model.set_objective(x * 3 + y * 5)
+
+      solution = model.solve
+
+      expect(solution[x]).to be_within(0.001).of(4.0)
+      expect(solution[y]).to be_within(0.001).of(0.0)
+    end
+
+    it 'allows values_at with Variable objects' do
+      model = LpSolver::Model.new('var_values')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      model.add_constraint(:c1, (x + y) >= 4)
+      model.minimize
+      model.set_objective(x * 3 + y * 5)
+
+      solution = model.solve
+
+      expect(solution.values_at(x, y)).to eq([4.0, 0.0])
+      expect(solution.values_at(:x, y)).to eq([4.0, 0.0])
+    end
+
+    it 'returns all_variables as a Symbol-keyed hash' do
+      model = LpSolver::Model.new('all_vars')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      model.add_constraint(:c1, (x + y) >= 4)
+      model.minimize
+      model.set_objective(x * 3 + y * 5)
+
+      solution = model.solve
+
+      all_vars = solution.all_variables
+      expect(all_vars).to be_a(Hash)
+      expect(all_vars[:x]).to be_within(0.001).of(4.0)
+      expect(all_vars[:y]).to be_within(0.001).of(0.0)
+    end
+
+    it 'to_h is equivalent to all_variables' do
+      model = LpSolver::Model.new('to_h_test')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      model.add_constraint(:c1, (x + y) >= 4)
+      model.minimize
+      model.set_objective(x * 3 + y * 5)
+
+      solution = model.solve
+
+      expect(solution.to_h).to eq(solution.all_variables)
+    end
+
+    it 'each_variable iterates over all variables' do
+      model = LpSolver::Model.new('each_var')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      model.add_constraint(:c1, (x + y) >= 4)
+      model.minimize
+      model.set_objective(x * 3 + y * 5)
+
+      solution = model.solve
+
+      collected = {}
+      solution.each_variable { |name, value| collected[name] = value }
+
+      expect(collected[:x]).to be_within(0.001).of(4.0)
+      expect(collected[:y]).to be_within(0.001).of(0.0)
+    end
+
+    it 'has_variable? checks for variable existence' do
+      model = LpSolver::Model.new('has_var')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      model.add_constraint(:c1, (x + y) >= 4)
+      model.minimize
+      model.set_objective(x * 3 + y * 5)
+
+      solution = model.solve
+
+      expect(solution.has_variable?(:x)).to be true
+      expect(solution.has_variable?(:y)).to be true
+      expect(solution.has_variable?(:z)).to be false
+      expect(solution.has_variable?(x)).to be true
+    end
+  end
 end

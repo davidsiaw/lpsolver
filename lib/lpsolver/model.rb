@@ -420,6 +420,17 @@ module LpSolver
       File.write(filename, to_lp)
     end
 
+    # Returns all variables defined in this model.
+    #
+    # @return [Hash{Symbol => Variable}] Maps variable names (Symbols) to
+    #   their Variable objects.
+    # @example
+    #   model.variables
+    #   # => { :x => @x(0), :y => @y(1) }
+    def variables
+      @variables
+    end
+
     private
 
     # Looks up a variable name by its internal index.

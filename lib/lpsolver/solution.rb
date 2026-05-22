@@ -55,24 +55,89 @@ module LpSolver
 
     # Retrieves the value of a variable by name.
     #
-    # @param name [Symbol, String] The variable name.
+    # @param name [Symbol, String, Variable] The variable name (Symbol, String,
+    #   or Variable object).
     # @return [Float] The optimal value of the variable.
     # @raise [KeyError] If the variable name is not found in the solution.
     # @example
-    #   solution[:x]  # => 4.0
+    #   solution[:x]        # => 4.0 (by symbol)
+    #   solution['x']       # => 4.0 (by string)
+    #   solution[x]         # => 4.0 (by Variable object)
     def [](name)
-      variables[name.to_s]
+      key = if name.is_a?(Variable)
+        name.name.to_s
+      else
+        name.to_s
+      end
+      variables[key]
     end
 
     # Retrieves values for multiple variables by name.
     #
-    # @param *names [Symbol, String] The variable names to retrieve.
+    # @param *names [Symbol, String, Variable] The variable names to retrieve.
     # @return [Array<Float>] An array of variable values in the same order.
     # @example
-    #   solution.values_at(:x, :y)  # => [4.0, 0.0]
-    # @param [Array<Object>] names
+    #   solution.values_at(:x, :y)      # => [4.0, 0.0]
+    #   solution.values_at(x, y)        # => [4.0, 0.0] (by Variable objects)
+    #   solution.values_at(:x, y, 'z')  # => [4.0, 0.0, 3.0] (mixed types)
     def values_at(*names)
-      names.map { |name| variables[name.to_s] }
+      names.map { |name| self[name] }
+    end
+
+    # Returns all variables as a hash with Symbol keys.
+    #
+    # This is a convenience method that converts the internal String-keyed
+    # variables hash to a Symbol-keyed hash for easier Ruby-style access.
+    #
+    # @return [Hash{Symbol => Float}] Maps variable names (as symbols) to
+    #   their optimal values.
+    # @example
+    #   solution.all_variables
+    #   # => { :x => 4.0, :y => 0.0 }
+    def all_variables
+      variables.transform_keys(&:to_sym)
+    end
+
+    # Returns the solution as a plain hash with Symbol keys.
+    #
+    # This is equivalent to #all_variables and is provided for Ruby
+    # convention compatibility.
+    #
+    # @return [Hash{Symbol => Float}] Maps variable names to values.
+    # @example
+    #   solution.to_h  # => { :x => 4.0, :y => 0.0 }
+    def to_h
+      all_variables
+    end
+
+    # Iterates over all variables and their optimal values.
+    #
+    # Yields each variable name (as a Symbol) and its value.
+    #
+    # @yieldparam name [Symbol] The variable name.
+    # @yieldparam value [Float] The optimal value of the variable.
+    # @return [self] self for chaining.
+    # @example
+    #   solution.each_variable { |name, value| puts "#{name} = #{value}" }
+    def each_variable
+      all_variables.each { |name, value| yield name, value }
+      self
+    end
+
+    # Checks if a variable exists in the solution.
+    #
+    # @param name [Symbol, String, Variable] The variable name to check.
+    # @return [Boolean] True if the variable exists in the solution.
+    # @example
+    #   solution.has_variable?(:x)  # => true
+    #   solution.has_variable?(:z)  # => false
+    def has_variable?(name)
+      key = if name.is_a?(Variable)
+        name.name.to_s
+      else
+        name.to_s
+      end
+      variables.key?(key)
     end
 
     # Checks if the solution is feasible.

@@ -159,6 +159,28 @@ solution = model.minimize!(x * 3 + y * 5)
 puts "Cost: $#{solution.objective_value}"
 puts "x = #{solution[:x]}"
 puts "y = #{solution[:y]}"
+
+# Extract all variable values
+puts solution.all_variables  # => { :x => 0.0, :y => 100.0 }
+puts solution.to_h           # => { :x => 0.0, :y => 100.0 }
+
+# Iterate over all variables
+solution.each_variable { |name, value| puts "#{name} = #{value}" }
+
+# Check if a variable exists
+puts solution.has_variable?(:x)  # => true
+puts solution.has_variable?(:z)  # => false
+
+# Access by Variable object directly
+puts solution[x]  # => 0.0
+puts solution[y]  # => 100.0
+
+# Get values for multiple variables
+puts solution.values_at(:x, :y)      # => [0.0, 100.0]
+puts solution.values_at(x, y)        # => [0.0, 100.0]
+
+# List all variables defined in the model
+model.variables.each { |name, var| puts "#{name} => #{var}" }
 ```
 
 ### Integer (MIP) Example
@@ -304,10 +326,55 @@ Writes the model to an LP file.
 Solves the model without setting an objective (legacy).
 
 ### `Solution#[]`
-Get a variable's value: `solution[:x]`
+Get a variable's value. Accepts Symbol, String, or Variable object.
+
+```ruby
+solution[:x]        # => 4.0 (by symbol)
+solution['x']       # => 4.0 (by string)
+solution[x]         # => 4.0 (by Variable object)
+```
 
 ### `Solution#values_at(*names)`
-Get multiple values: `solution.values_at(:x, :y)`
+Get multiple values. Accepts Symbol, String, or Variable objects.
+
+```ruby
+solution.values_at(:x, :y)      # => [4.0, 0.0]
+solution.values_at(x, y)        # => [4.0, 0.0]
+solution.values_at(:x, y, 'z')  # => [4.0, 0.0, 3.0]
+```
+
+### `Solution#all_variables`
+Returns all variables as a Symbol-keyed Hash.
+
+```ruby
+solution.all_variables  # => { :x => 4.0, :y => 0.0 }
+```
+
+### `Solution#to_h`
+Alias for `all_variables`. Returns a plain Hash.
+
+### `Solution#each_variable { |name, value| ... }`
+Iterate over all variables and their values.
+
+```ruby
+solution.each_variable { |name, value| puts "#{name} = #{value}" }
+```
+
+### `Solution#has_variable?(name)`
+Check if a variable exists in the solution. Accepts Symbol, String, or Variable.
+
+```ruby
+solution.has_variable?(:x)  # => true
+solution.has_variable?(:z)  # => false
+```
+
+### `Model#variables`
+Returns all defined variables as a Hash mapping names to Variable objects.
+
+```ruby
+model.variables  # => { :x => @x(0), :y => @y(1) }
+model.variables.each { |name, var| puts "#{name} => #{var}" }
+```
 
 ### `Solution#objective_value`
 The optimal (best) objective value.

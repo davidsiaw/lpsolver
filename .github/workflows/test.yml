@@ -36,16 +36,14 @@ jobs:
       run: |
         echo "Platform: ${{ matrix.os }}, Ruby: ${{ matrix.ruby }}"
         if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-          # Download precompiled binary from GitHub releases
           wget -q "https://github.com/ERGO-Code/HiGHS/releases/download/v1.14.0/highs-1.14.0-x86_64-linux-gnu-static-mit.tar.gz" -O /tmp/highs.tar.gz
           tar xzf /tmp/highs.tar.gz -C /tmp/
-          sudo cp /tmp/highs-1.14.0-x86_64-linux-gnu-static-mit/bin/highs /usr/local/bin/highs
+          sudo cp /tmp/bin/highs /usr/local/bin/highs
           sudo chmod +x /usr/local/bin/highs
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-          # Download precompiled binary from GitHub releases (ARM64 for latest macOS runners)
           wget -q "https://github.com/ERGO-Code/HiGHS/releases/download/v1.14.0/highs-1.14.0-arm-apple-static-mit.tar.gz" -O /tmp/highs.tar.gz
           tar xzf /tmp/highs.tar.gz -C /tmp/
-          sudo cp /tmp/highs-1.14.0-arm-apple-static-mit/bin/highs /usr/local/bin/highs
+          sudo cp /tmp/bin/highs /usr/local/bin/highs
           sudo chmod +x /usr/local/bin/highs
         fi
         echo "HiGHS installed: $(highs --version 2>&1 || highs --help 2>&1 | head -1)"

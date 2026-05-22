@@ -17,13 +17,6 @@ jobs:
       with:
         ruby-version: '3.4'
         bundler-cache: true
-    - name: Install HiGHS solver
-      run: |
-        wget -q "https://github.com/ERGO-Code/HiGHS/releases/download/v1.14.0/highs-1.14.0-x86_64-linux-gnu-static-mit.tar.gz" -O /tmp/highs.tar.gz
-        tar xzf /tmp/highs.tar.gz -C /tmp/
-        sudo cp /tmp/highs-1.14.0-x86_64-linux-gnu-static-mit/bin/highs /usr/local/bin/highs
-        sudo chmod +x /usr/local/bin/highs
-        echo "HiGHS installed: $(highs --version 2>&1 || highs --help 2>&1 | head -1)"
     - name: Build documentation
       run: bundle exec yard
     - name: Upload documentation
