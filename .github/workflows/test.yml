@@ -1,0 +1,63 @@
+name: test
+
+on:
+  pull_request:
+    types:
+    - opened
+    - synchronize
+  push:
+    branches:
+    - master
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  test:
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        ruby:
+          - '3.4'
+          - '4.0'
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+    - name: script
+      run: |-
+        cp -r spec ruby-${{ matrix.ruby }}-${{ matrix.os }}-spec
+        bundle exec rspec ruby-${{ matrix.ruby }}-${{ matrix.os }}-spec \
+        -f j \
+        -o tmp/json-reports/rspec_results-${{ matrix.ruby }}-${{ matrix.os }}.json
+    - uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        if-no-files-found: error
+        name: rspec_results-${{ matrix.ruby }}-${{ matrix.os }}.json
+        path: tmp/json-reports
+
+  report-rspec:
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all rspec results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: rspec_results-*
+          path: /tmp/json-reports
+          merge-multiple: true
+      - name: RSpec Report
+        uses: SonicGarden/rspec-report-action@v6
+        with:
+          comment: ${{ !github.event.pull_request.head.repo.fork }}
+          json-path: /tmp/json-reports/rspec_results-*.json
