@@ -1,0 +1,12 @@
+*.gem
+.bundle/
+coverage/
+*.rbc
+*.log
+*.tmp
+*.tmp.*
+*.pid
+*.sock
+*.lock
+vendor/
+.rspec_status
