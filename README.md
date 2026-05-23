@@ -1,5 +1,7 @@
 # LpSolver
 
+[![test](https://github.com/davidsiaw/lpsolver/actions/workflows/test.yml/badge.svg)](https://github.com/davidsiaw/lpsolver/actions/workflows/test.yml)
+
 A Ruby gem for solving optimization problems using the [HiGHS](https://github.com/ERGO-Code/HiGHS) solver.
 
 ## What is this for?
@@ -387,3 +389,7 @@ True if the objective can improve without limit.
 ## Code of Conduct
 
 See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
+# Disclaimer
+
+Note that this is vibe-coded in nearly its entirety as part of a quick experiment to improve tokens per sec on my local machine and I do not recommend it for use in any sensitive environments. Note that I do not accept any responsibility for any damages or losses caused by the use of this gem, and I still expect contributed PRs to be provided in sensible and human-reviewable doses.
