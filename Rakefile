@@ -7,23 +7,24 @@ require 'tmpdir'
 
 RSpec::Core::RakeTask.new(:spec)
 
-# Platform detection for HiGHS precompiled binaries
+# Platform detection for HiGHS precompiled binaries.
+# Returns nil if no precompiled binary is available for this platform.
 def platform_key
   case RbConfig::CONFIG['host_os']
   when /linux/
     'x86_64-linux-gnu'
   when /darwin/
-    if RbConfig::CONFIG['host_cpu'] == 'arm64'
-      'arm-apple'
-    else
-      'x86_64-apple'
-    end
+    # HiGHS only provides arm-apple (Apple Silicon) precompiled binaries.
+    # Intel Macs must install HiGHS system-wide or set HIGHS_DIR.
+    RbConfig::CONFIG['host_cpu'] == 'arm64' ? 'arm-apple' : nil
   else
-    abort "Unsupported platform: #{RbConfig::CONFIG['host_os']}"
+    nil
   end
 end
 
-# Download and extract HiGHS precompiled static library (no CMake needed)
+# Download and extract HiGHS precompiled static library (no CMake needed).
+# Skips download if no precompiled binary is available for this platform
+# (e.g., Intel Macs). The native extension will still be built from bundled source.
 task :build_highs do
   highs_src = File.expand_path('ext/lpsolver-highs', __dir__)
   build_dir = File.join(highs_src, 'build')
@@ -33,6 +34,13 @@ task :build_highs do
   lib_file = File.join(build_dir, 'lib', 'libhighs.a')
   if File.exist?(lib_file)
     puts "HiGHS already built at #{lib_file}."
+    next
+  end
+
+  # Skip if no precompiled binary available (e.g., Intel Macs)
+  unless key
+    puts "No precompiled HiGHS binary available for this platform."
+    puts "Building from source (requires CMake)..."
     next
   end
 

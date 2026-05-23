@@ -32,6 +32,9 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
+    - name: Install HiGHS on macOS (fallback for native extension)
+      if: runner.os == 'macOS'
+      run: brew install highs
     - name: Build native extension
       run: bundle exec rake compile
     - name: Run examples
