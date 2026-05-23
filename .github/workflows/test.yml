@@ -32,8 +32,6 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
-    - name: Build native extension (downloads HiGHS automatically)
-      run: rake compile
     - name: Run examples
       run: |
         ruby -Ilib examples/coin_purse.rb
