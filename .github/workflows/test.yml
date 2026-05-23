@@ -32,18 +32,18 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
+    - name: Build native extension
+      run: bundle exec rake compile
     - name: Run examples
       run: |
-        ruby -Ilib examples/coin_purse.rb
-        ruby -Ilib examples/diet_problem.rb
-        ruby -Ilib examples/factory.rb
-        ruby -Ilib examples/portfolio.rb
+        bundle exec ruby -Ilib examples/coin_purse.rb
+        bundle exec ruby -Ilib examples/diet_problem.rb
+        bundle exec ruby -Ilib examples/factory.rb
+        bundle exec ruby -Ilib examples/portfolio.rb
     - name: script
       run: |-
         cp -r spec ruby-${{ matrix.ruby }}-${{ matrix.os }}-spec
-        bundle exec rspec ruby-${{ matrix.ruby }}-${{ matrix.os }}-spec \
-        -f j \
-        -o tmp/json-reports/rspec_results-${{ matrix.ruby }}-${{ matrix.os }}.json
+        bundle exec rspec ruby-${{ matrix.ruby }}-${{ matrix.os }}-spec -f j -o tmp/json-reports/rspec_results-${{ matrix.ruby }}-${{ matrix.os }}.json
     - uses: actions/upload-artifact@v7
       if: always()
       with:
