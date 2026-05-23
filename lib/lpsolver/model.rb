@@ -72,12 +72,25 @@ module LpSolver
   class Model
     # The path to the HiGHS binary.
     #
-    # Set via the HIGHS_PATH environment variable, or defaults to 'highs'
-    # on the system PATH. This is used to invoke the HiGHS solver via
-    # the command line.
+    # Resolution order:
+    #   1. HIGHS_PATH environment variable
+    #   2. Bundled binary at lib/lpsolver/highs (from rake compile)
+    #   3. 'highs' on system PATH
     #
     # @return [String] The path to the HiGHS executable.
-    HIGHS_PATH = ENV.fetch('HIGHS_PATH', 'highs')
+    HIGHS_PATH = begin
+      env_path = ENV.fetch('HIGHS_PATH', nil)
+      if env_path
+        env_path
+      else
+        bundled = File.expand_path('../../lib/lpsolver/highs', __dir__)
+        if File.exist?(bundled)
+          bundled
+        else
+          'highs'
+        end
+      end
+    end
 
     # Creates a new empty LP/QP/MIP model.
     #

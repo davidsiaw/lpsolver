@@ -109,30 +109,7 @@ Or run directly from source:
 ruby -Ilib examples/coin_purse.rb
 ```
 
-## Prerequisites
-
-HiGHS must be installed:
-
-```bash
-# Ubuntu/Debian
-sudo apt install highs
-
-# macOS
-brew install highs
-
-# Or from source
-git clone https://github.com/ERGO-Code/HiGHS.git
-cd HiGHS && mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
-sudo make install
-```
-
-Or set a custom path:
-
-```bash
-export HIGHS_PATH=/path/to/highs
-```
+> **HiGHS is bundled automatically.** The `rake compile` task (run during `bundle install` or `rake`) downloads the HiGHS v1.14.0 precompiled static library from GitHub and links it into the gem. No system-level HiGHS installation is required — it ships with the gem.
 
 ## Usage
 

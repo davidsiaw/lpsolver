@@ -7,6 +7,7 @@ gemspec
 
 # Specify development dependencies here and not in the gemspec
 gem 'rake'
+gem 'rake-compiler'
 gem 'rspec'
 gem 'rubocop'
 gem 'rubocop-rake'

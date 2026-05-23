@@ -1,0 +1,3 @@
+[submodule "ext/lpsolver-highs"]
+	path = ext/lpsolver-highs
+	url = https://github.com/ERGO-Code/HiGHS.git

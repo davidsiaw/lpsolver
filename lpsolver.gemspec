@@ -22,8 +22,11 @@ Gem::Specification.new do |spec|
   spec.metadata['documentation_uri'] = 'https://davidsiaw.github.io/lpsolver'
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  spec.files         = Dir['{exe,data,lib}/**/*'] + %w[Gemfile lpsolver.gemspec README.md LICENSE.txt]
+  spec.add_development_dependency 'rake-compiler', '~> 1.2'
+
+  spec.files         = Dir['{exe,data,lib,ext}/**/*'] + %w[Gemfile lpsolver.gemspec README.md LICENSE.txt]
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
+  spec.extensions    = %w[ext/lpsolver/extconf.rb]
 end

@@ -26,29 +26,14 @@ jobs:
           - '3.4'
           - '4.0'
     runs-on: ${{ matrix.os }}
-    env:
-      HIGHS_PATH: /usr/local/bin/highs
     steps:
     - uses: actions/checkout@v6
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
-    - name: Install HiGHS solver
-      run: |
-        echo "Platform: ${{ matrix.os }}, Ruby: ${{ matrix.ruby }}"
-        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-          wget -q "https://github.com/ERGO-Code/HiGHS/releases/download/v1.14.0/highs-1.14.0-x86_64-linux-gnu-static-mit.tar.gz" -O /tmp/highs.tar.gz
-          tar xzf /tmp/highs.tar.gz -C /tmp/
-          sudo cp /tmp/bin/highs /usr/local/bin/highs
-          sudo chmod +x /usr/local/bin/highs
-        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-          wget -q "https://github.com/ERGO-Code/HiGHS/releases/download/v1.14.0/highs-1.14.0-arm-apple-static-mit.tar.gz" -O /tmp/highs.tar.gz
-          tar xzf /tmp/highs.tar.gz -C /tmp/
-          sudo cp /tmp/bin/highs /usr/local/bin/highs
-          sudo chmod +x /usr/local/bin/highs
-        fi
-        echo "HiGHS installed: $(highs --version 2>&1 || highs --help 2>&1 | head -1)"
+    - name: Build native extension (downloads HiGHS automatically)
+      run: rake compile
     - name: Run examples
       run: |
         ruby -Ilib examples/coin_purse.rb

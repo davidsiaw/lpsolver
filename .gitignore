@@ -10,3 +10,15 @@ coverage/
 *.lock
 vendor/
 .rspec_status
+**/*.so
+**/*.o
+**/Makefile
+**/mkmf.log
+# HiGHS build artifacts
+ext/lpsolver-highs/build/
+# CMake cache
+ext/lpsolver-highs/build
+# Bundled HiGHS binary (copied by rake compile)
+lib/lpsolver/highs
+.bundler/
+.cache/
