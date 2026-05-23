@@ -1,11 +1,17 @@
 # frozen_string_literal: true
 
 require 'bundler/gem_tasks'
-require 'rspec/core/rake_task'
 require 'rbconfig'
 require 'tmpdir'
 
-RSpec::Core::RakeTask.new(:spec)
+begin
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new(:spec)
+rescue LoadError
+  task :spec do
+    abort 'rspec not installed. Run: gem install rspec'
+  end
+end
 
 # Platform detection for HiGHS precompiled binaries.
 # Returns nil if no precompiled binary is available for this platform.
@@ -119,12 +125,12 @@ task :compile do
     system('make') || abort('make failed')
   end
 
-  # Copy .so to lib directory for require
-  so_file = Dir.glob(File.join(ext_dir, '*.so')).first
-  if so_file
+  # Copy compiled extension (.so on Linux, .bundle on macOS) to lib directory for require
+  ext_file = Dir.glob(File.join(ext_dir, '*.so')).first || Dir.glob(File.join(ext_dir, '*.bundle')).first
+  if ext_file
     require 'fileutils'
-    FileUtils.cp(so_file, lib_dir)
-    puts "Copied native.so to lib/lpsolver/"
+    FileUtils.cp(ext_file, lib_dir)
+    puts "Copied native extension to lib/lpsolver/"
   end
 
   # Copy bundled HiGHS binary for Model CLI fallback

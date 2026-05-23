@@ -11,6 +11,11 @@ highs_build = File.join(highs_src, 'build')
 
 highs_found = false
 
+# Platform-specific linking flags
+is_darwin = RbConfig::CONFIG['host_os'] =~ /darwin/
+std_lib = is_darwin ? '-lc++' : '-lstdc++'
+rpath_flag = is_darwin ? '-Wl,-rpath,@loader_path/../..' : '-Wl,-rpath,$ORIGIN'
+
 # Priority: 1. HIGHS_DIR env var, 2. submodule build, 3. system paths
 highs_dir = ENV.fetch('HIGHS_DIR', nil)
 
@@ -22,7 +27,7 @@ if highs_dir
      (File.exist?(File.join(highs_lib, 'libhighs.so')) || File.exist?(File.join(highs_lib, 'libhighs.a')))
     $INCFLAGS += " -I#{highs_include}"
     $LDFLAGS += " -L#{highs_lib}"
-    $LIBS += " -lhighs -lstdc++"
+    $LIBS += " -lhighs #{std_lib}"
     $LOAD_PATH << highs_lib
     highs_found = true
   end
@@ -32,24 +37,25 @@ unless highs_found
   # Check bundled submodule (CMake build or precompiled tarball)
   if File.exist?(File.join(highs_build, 'lib', 'libhighs.so')) ||
      File.exist?(File.join(highs_build, 'lib', 'libhighs.a'))
-    highs_include = File.join(highs_src, 'highs')
     highs_lib = File.join(highs_build, 'lib')
 
-    # CMake build: HConfig.h is in build dir
-    # Precompiled tarball: HConfig.h is in build/include/highs/
+    # CMake build: HConfig.h is in build dir, headers in highs/ subdir
+    # Precompiled tarball: HConfig.h is in build/include/highs/, headers in include/highs/
     highs_config = File.join(highs_build, 'HConfig.h')
     if File.exist?(highs_config)
+      # CMake build layout
+      highs_include = File.join(highs_src, 'highs')
       $INCFLAGS += " -I#{highs_include} -I#{highs_build}"
     else
       # Precompiled tarball layout
       highs_config_inc = File.join(highs_build, 'include', 'highs')
       if File.exist?(File.join(highs_config_inc, 'HConfig.h'))
-        $INCFLAGS += " -I#{highs_include} -I#{highs_config_inc}"
+        $INCFLAGS += " -I#{File.join(highs_build, 'include')}"
       end
     end
 
-    $LDFLAGS += " -L#{highs_lib} -Wl,-rpath,#{highs_lib}"
-    $LIBS += " -lhighs -lstdc++"
+    $LDFLAGS += " -L#{highs_lib} -Wl,-rpath,#{is_darwin ? '@loader_path/../..' : '$ORIGIN'}"
+    $LIBS += " -lhighs #{std_lib}"
     $LOAD_PATH << highs_lib
     highs_found = true
   end
@@ -70,10 +76,10 @@ abort <<~ERROR unless highs_found
   Options:
     1. Build from submodule: rake build_highs && rake compile
     2. Set HIGHS_DIR=/path/to/highs
-    3. Install system-wide: sudo apt install highs
+    3. Install system-wide: brew install highs (macOS) or sudo apt install highs (Linux)
 
   Submodule location: #{highs_src}
-  Build output: #{highs_build}/lib/libhighs.so
+  Build output: #{highs_build}/lib/libhighs.a
 ERROR
 
 create_makefile('lpsolver/native')
