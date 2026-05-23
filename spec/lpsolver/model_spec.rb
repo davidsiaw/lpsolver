@@ -235,6 +235,64 @@ RSpec.describe LpSolver::Model do
 
       expect(solution.infeasible?).to be true
     end
+
+    it 'detects infeasible models with operator DSL' do
+      model = LpSolver::Model.new('infeasible_op')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      # Contradictory constraints
+      model.add_constraint(:upper, (x + y) <= 2)
+      model.add_constraint(:lower, (x + y) >= 5)
+
+      solution = model.minimize!(x + y)
+
+      expect(solution.infeasible?).to be true
+      expect(solution.status).to eq(:infeasible)
+      expect(solution.feasible?).to be false
+    end
+
+    it 'returns 0.0 for objective_value when infeasible' do
+      model = LpSolver::Model.new('infeasible_obj')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      model.add_constraint(:upper, (x + y) <= 2)
+      model.add_constraint(:lower, (x + y) >= 5)
+
+      solution = model.minimize!(x + y)
+
+      expect(solution.infeasible?).to be true
+      expect(solution.objective_value).to eq(0.0)
+      expect(solution.variables).to be_empty
+    end
+
+    it 'detects unbounded maximization problems' do
+      model = LpSolver::Model.new('unbounded_max')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      # No constraint limiting x or y — objective can grow infinitely
+      solution = model.maximize!(x + y)
+
+      expect(solution.unbounded?).to be true
+      expect(solution.status).to eq(:unbounded)
+    end
+
+    it 'detects infeasible QP problems' do
+      model = LpSolver::Model.new('infeasible_qp')
+      x = model.add_variable(:x, lb: 0)
+      y = model.add_variable(:y, lb: 0)
+
+      # Contradictory constraints
+      model.add_constraint(:upper, (x + y) <= 1)
+      model.add_constraint(:lower, (x + y) >= 4)
+
+      solution = model.minimize!(x * x + y * y)
+
+      expect(solution.infeasible?).to be true
+      expect(solution.status).to eq(:infeasible)
+    end
   end
 
   describe 'QP (Quadratic Programming)' do

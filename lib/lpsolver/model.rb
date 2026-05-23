@@ -264,12 +264,16 @@ module LpSolver
             "--solution_file #{solution_file.path}"
 
       output = `#{cmd} 2>&1`
-      status = $?.success?
-
       lp_file.unlink
       opts_file.unlink
 
-      raise SolverError, "HiGHS solver failed:\n#{output}" unless status
+      # HiGHS returns non-zero exit code for infeasible/unbounded problems,
+      # but still writes a valid solution file. Check for valid status instead.
+      solution_content = File.read(solution_file.path)
+      status_match = solution_content.match(/Model status\s*\n\s*(\S+)/i)
+      unless status_match
+        raise SolverError, "HiGHS solver failed:\n#{output}" unless $?.success?
+      end
 
       @solution = parse_solution_file(solution_file.path)
       solution_file.unlink

@@ -21,11 +21,15 @@ module LpSolver
     # @return [Hash{String => Float}] Maps variable names to their optimal values.
     #   The keys are the variable names as strings (as produced by HiGHS),
     #   and the values are the optimal decision variable values.
+    #   When the solution is infeasible, this hash is empty.
+    #   Always check `infeasible?` or `unbounded?` before reading variable values.
     attr_reader :variables
 
     # @return [Float] The optimal objective function value.
     #   For minimization problems, this is the minimum value.
     #   For maximization problems, this is the maximum value.
+    #   When the solution is infeasible, this returns `0.0`.
+    #   Always check `infeasible?` or `unbounded?` before reading this value.
     attr_reader :objective_value
 
     # @return [String] The status of the model as reported by HiGHS.
@@ -39,6 +43,19 @@ module LpSolver
     # @return [Integer] The number of iterations the solver performed.
     #   This is a diagnostic metric; may be 0 for some solver types.
     attr_reader :iterations
+
+    # Returns the model status as a Symbol.
+    #
+    # @return [Symbol] The solver status as a Ruby symbol:
+    #   - :optimal — An optimal solution was found.
+    #   - :infeasible — No feasible solution exists.
+    #   - :unbounded — The objective can be improved without bound.
+    #   - :unknown — The solver could not determine the status.
+    # @example
+    #   solution.status  # => :optimal
+    def status
+      @model_status.to_sym
+    end
 
     # Creates a new Solution object.
     #
@@ -57,12 +74,15 @@ module LpSolver
     #
     # @param name [Symbol, String, Variable] The variable name (Symbol, String,
     #   or Variable object).
-    # @return [Float] The optimal value of the variable.
+    # @return [Float] The optimal value of the variable, or `nil` if the
+    #   solution is infeasible or unbounded.
     # @raise [KeyError] If the variable name is not found in the solution.
     # @example
     #   solution[:x]        # => 4.0 (by symbol)
     #   solution['x']       # => 4.0 (by string)
     #   solution[x]         # => 4.0 (by Variable object)
+    # @note When the solution is infeasible, all variables are empty.
+    #   Check `infeasible?` first before accessing variable values.
     def [](name)
       key = if name.is_a?(Variable)
         name.name.to_s

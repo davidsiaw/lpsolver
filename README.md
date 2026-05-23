@@ -192,6 +192,32 @@ solution = model.maximize!(x * 3 + y * 5)
 puts solution.objective_value  # => 50.0
 ```
 
+### Infeasible and Unbounded Solutions
+
+Not all problems have a valid solution. Always check the status before accessing values:
+
+```ruby
+model = LpSolver::Model.new
+x = model.add_variable(:x, lb: 0)
+y = model.add_variable(:y, lb: 0)
+
+# Contradictory constraints — no solution exists
+model.add_constraint(:c1, (x + y) <= 2)
+model.add_constraint(:c2, (x + y) >= 5)
+
+solution = model.minimize!(x + y)
+
+if solution.infeasible?
+  puts "No feasible solution exists"
+elsif solution.unbounded?
+  puts "The objective can grow without limit"
+else
+  puts "Optimal value: #{solution.objective_value}"
+end
+```
+
+> **Important:** When a solution is infeasible, `objective_value` returns `0.0` and `variables` is empty. Always call `solution.infeasible?` or `solution.unbounded?` first before reading `objective_value` or variable values.
+
 ### Complex Expressions
 
 You can chain operators with constants and unary minus:
