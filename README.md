@@ -4,6 +4,8 @@
 
 A Ruby gem for solving optimization problems using the [HiGHS](https://github.com/ERGO-Code/HiGHS) solver.
 
+Reference documentation can be found at https://davidsiaw.github.io/lpsolver/
+
 ## What is this for?
 
 Imagine you want to **maximize profit** or **minimize cost** while following certain rules (like a budget limit or a minimum requirement). This gem helps you find the best answer.
