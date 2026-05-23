@@ -15,10 +15,7 @@
 #   y = model.add_variable(:y, lb: 0)
 #
 #   model.add_constraint(:budget, (x * 2 + y) <= 100)
-#   model.minimize
-#   model.set_objective(x * 3 + y * 5)
-#
-#   solution = model.solve
+#   solution = model.minimize!(x * 3 + y * 5)
 #   puts solution.objective_value  # => 12.0
 #
 # @see LpSolver::Model
@@ -39,3 +36,12 @@ require_relative 'lpsolver/quadratic_expression'
 # Solvers and data classes
 require_relative 'lpsolver/solution'
 require_relative 'lpsolver/model'
+require_relative 'lpsolver/lp_generator'
+require_relative 'lpsolver/drivers'
+
+# Native extension (optional — only available if compiled)
+begin
+  require_relative 'lpsolver/native'
+rescue LoadError
+  # Native extension not compiled — NativeDriver will raise LoadError at runtime
+end

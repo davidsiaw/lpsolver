@@ -145,7 +145,7 @@ RSpec.describe 'README Examples' do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, ((x * 2) + y) <= 10)
-      model.set_objective(x + y)
+      model.minimize!(x + y)
 
       lp = model.to_lp
 
@@ -167,15 +167,14 @@ RSpec.describe 'README Examples' do
     end
   end
 
-  describe 'Legacy API (minimize + set_objective + solve)' do
-    it 'still works for backwards compatibility' do
+  describe 'Simplified API (minimize! / maximize!)' do
+    it 'minimize! sets heading, objective, and solves' do
       model = LpSolver::Model.new
       x = model.add_variable(:x, lb: 0)
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c, (x + y) >= 4)
-      model.minimize
-      model.set_objective((x * 3) + (y * 5))
+      model.minimize!((x * 3) + (y * 5))
 
       solution = model.solve
 
@@ -183,14 +182,13 @@ RSpec.describe 'README Examples' do
       expect(solution.objective_value).to be_within(0.001).of(12.0)
     end
 
-    it 'maximize with legacy API works' do
+    it 'maximize! sets heading, objective, and solves' do
       model = LpSolver::Model.new
       x = model.add_variable(:x, lb: 0)
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c, (x + y) <= 10)
-      model.maximize
-      model.set_objective((x * 3) + (y * 5))
+      model.maximize!((x * 3) + (y * 5))
 
       solution = model.solve
 

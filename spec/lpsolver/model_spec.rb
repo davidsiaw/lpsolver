@@ -10,8 +10,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, (x + y) >= 4)
-      model.minimize
-      model.set_objective((x * 3) + (y * 5))
+      model.minimize!((x * 3) + (y * 5))
 
       solution = model.solve
 
@@ -29,8 +28,7 @@ RSpec.describe LpSolver::Model do
 
       model.add_constraint(:budget, (x + y) <= 10)
       model.add_constraint(:resource, ((x * 2) + y) <= 16)
-      model.maximize
-      model.set_objective((x * 3) + (y * 5))
+      model.maximize!((x * 3) + (y * 5))
 
       solution = model.solve
 
@@ -46,8 +44,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:eq, (x + y) == 10)
-      model.minimize
-      model.set_objective((x * 2) + (y * 3))
+      model.minimize!((x * 2) + (y * 3))
 
       solution = model.solve
 
@@ -65,8 +62,7 @@ RSpec.describe LpSolver::Model do
 
       # x * 2 + y * 3 + 5 >= 20  →  x * 2 + y * 3 >= 15
       model.add_constraint(:c, ((x * 2) + (y * 3) + 5) >= 20)
-      model.minimize
-      model.set_objective(x + y)
+      model.minimize!(x + y)
 
       solution = model.solve
 
@@ -87,8 +83,7 @@ RSpec.describe LpSolver::Model do
 
       # x * 2 + y * 3 - z + 5 <= 20  →  x * 2 + y * 3 - z <= 15
       model.add_constraint(:c, ((x * 2) + (y * 3) - z + 5) <= 20)
-      model.minimize
-      model.set_objective(x + y + z)
+      model.minimize!(x + y + z)
 
       solution = model.solve
 
@@ -103,8 +98,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, [[x.index, 1], [y.index, 1]], lb: 4)
-      model.minimize
-      model.set_objective({ x.index => 3.0, y.index => 5.0 })
+      model.minimize!({ x.index => 3.0, y.index => 5.0 })
 
       solution = model.solve
 
@@ -167,8 +161,7 @@ RSpec.describe LpSolver::Model do
       model.add_constraint(:lower_deviation, value_expr + [[d.index, 1.0]], lb: TARGET)
 
       obj = weight_expr + [[d.index, PENALTY]]
-      model.minimize
-      model.set_objective(Hash[obj])
+      model.minimize!(Hash[obj])
 
       solution = model.solve
 
@@ -228,8 +221,7 @@ RSpec.describe LpSolver::Model do
 
       model.add_constraint(:c1, [[x.index, 1], [y.index, 1]], lb: 10)
       model.add_constraint(:c2, [[x.index, 1], [y.index, 1]], ub: 5)
-      model.minimize
-      model.set_objective({ x.index => 1.0, y.index => 1.0 })
+      model.minimize!({ x.index => 1.0, y.index => 1.0 })
 
       solution = model.solve
 
@@ -304,8 +296,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c, (x + y) >= 2)
-      model.minimize
-      model.set_objective((x * x) + (y * y))
+      model.minimize!((x * x) + (y * y))
 
       solution = model.solve
 
@@ -324,8 +315,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c, (x + y) >= 3)
-      model.minimize
-      model.set_objective((x * x) + ((x * y) * 2) + (y * y) + x + y)
+      model.minimize!((x * x) + ((x * y) * 2) + (y * y) + x + y)
 
       solution = model.solve
 
@@ -339,8 +329,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c, (x + y) >= 2)
-      model.minimize
-      model.set_objective((x * x) + (y * y))
+      model.minimize!((x * x) + (y * y))
 
       lp = model.to_lp
       expect(lp).to include('obj:')
@@ -356,8 +345,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, [[x.index, 1], [y.index, 1]], lb: 5)
-      model.minimize
-      model.set_objective({ x.index => 1.0, y.index => 2.0 })
+      model.minimize!({ x.index => 1.0, y.index => 2.0 })
 
       lp = model.to_lp
       expect(lp).to include('Integers')
@@ -387,8 +375,7 @@ RSpec.describe LpSolver::Model do
 
       model.add_constraint(:c1, ((x * 2) + y) <= 10)
       model.add_constraint(:c2, (x + (y * 2)) >= 8)
-      model.minimize
-      model.set_objective(x + y)
+      model.minimize!(x + y)
 
       lp = model.to_lp
       expect(lp).to include('Subject To')
@@ -417,8 +404,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, (x + y) >= 4)
-      model.minimize
-      model.set_objective(x * 3 + y * 5)
+      model.minimize!(x * 3 + y * 5)
 
       solution = model.solve
 
@@ -432,8 +418,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, (x + y) >= 4)
-      model.minimize
-      model.set_objective(x * 3 + y * 5)
+      model.minimize!(x * 3 + y * 5)
 
       solution = model.solve
 
@@ -447,8 +432,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, (x + y) >= 4)
-      model.minimize
-      model.set_objective(x * 3 + y * 5)
+      model.minimize!(x * 3 + y * 5)
 
       solution = model.solve
 
@@ -464,8 +448,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, (x + y) >= 4)
-      model.minimize
-      model.set_objective(x * 3 + y * 5)
+      model.minimize!(x * 3 + y * 5)
 
       solution = model.solve
 
@@ -478,8 +461,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, (x + y) >= 4)
-      model.minimize
-      model.set_objective(x * 3 + y * 5)
+      model.minimize!(x * 3 + y * 5)
 
       solution = model.solve
 
@@ -496,8 +478,7 @@ RSpec.describe LpSolver::Model do
       y = model.add_variable(:y, lb: 0)
 
       model.add_constraint(:c1, (x + y) >= 4)
-      model.minimize
-      model.set_objective(x * 3 + y * 5)
+      model.minimize!(x * 3 + y * 5)
 
       solution = model.solve
 

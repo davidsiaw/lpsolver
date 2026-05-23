@@ -115,6 +115,32 @@ ruby -Ilib examples/coin_purse.rb
 
 > **HiGHS is bundled automatically.** The `rake compile` task (run during `bundle install` or `rake`) downloads the HiGHS v1.14.0 precompiled static library from GitHub and links it into the gem. No system-level HiGHS installation is required — it ships with the gem.
 
+## Solvers
+
+The Model class uses a pluggable driver architecture. By default it uses the **CLI driver** (HiGHS subprocess), but you can switch to the **native driver** (C extension) for direct in-process solving.
+
+### CLI Driver (default)
+
+The CLI driver serializes the model to HiGHS LP format and invokes the HiGHS binary as a subprocess. This is the default and most reliable approach.
+
+```ruby
+model = LpSolver::Model.new
+# Uses CliDriver by default
+solution = model.minimize!(x * 3 + y * 5)
+```
+
+### Native Driver
+
+The native driver calls the HiGHS C extension directly, bypassing file serialization. It requires the native extension to be compiled (`rake compile`).
+
+```ruby
+model = LpSolver::Model.new
+model.driver = LpSolver::NativeDriver.new
+solution = model.minimize!(x * 3 + y * 5)
+```
+
+> **Note:** The native driver is currently experimental. The CLI driver is recommended for production use.
+
 ## Usage
 
 ### Simple Example (Operator DSL)
@@ -248,7 +274,7 @@ x = model.add_variable(:x, lb: 0)
 y = model.add_variable(:y, lb: 0)
 
 model.add_constraint(:c1, (x * 2 + y) <= 10)
-model.set_objective(x + y)
+model.minimize!(x + y)
 
 # Print the LP file format
 puts model.to_lp
@@ -313,24 +339,23 @@ Set the objective to minimize and solve in one call.
 ### `Model#maximize!(objective)`
 Set the objective to maximize and solve in one call.
 
-### `Model#minimize`
-Set the optimization sense to minimization (legacy, use `minimize!` instead).
-
-### `Model#maximize`
-Set the optimization sense to maximization (legacy, use `maximize!` instead).
-
-### `Model#set_objective(objective)`
-Set the objective function without solving (legacy, use `minimize!`/`maximize!` instead).
-- `objective` can be a `LinearExpression`, `QuadraticExpression`, or Hash.
-
 ### `Model#to_lp`
 Returns the model as a HiGHS LP format string.
 
 ### `Model#write_lp(filename)`
 Writes the model to an LP file.
 
-### `Model#solve`
-Solves the model without setting an objective (legacy).
+### `Model#driver`
+Returns the current solver driver.
+
+### `Model#driver=(driver)`
+Sets the solver driver. Accepts `LpSolver::CliDriver` (default) or `LpSolver::NativeDriver`.
+
+### `LpSolver::CliDriver.new(highs_path: nil)`
+Creates a CLI driver. Uses `Model::HIGHS_PATH` by default, or the provided path.
+
+### `LpSolver::NativeDriver.new`
+Creates a native driver. Requires the native extension to be compiled.
 
 ### `Solution#[]`
 Get a variable's value. Accepts Symbol, String, or Variable object.
