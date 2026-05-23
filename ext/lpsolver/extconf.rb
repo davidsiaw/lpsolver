@@ -11,10 +11,7 @@ highs_build = File.join(highs_src, 'build')
 
 highs_found = false
 
-# Platform-specific linking flags
-is_darwin = RbConfig::CONFIG['host_os'] =~ /darwin/
-std_lib = is_darwin ? '-lc++' : '-lstdc++'
-rpath_flag = is_darwin ? '-Wl,-rpath,@loader_path/../..' : '-Wl,-rpath,$ORIGIN'
+
 
 # Priority: 1. HIGHS_DIR env var, 2. submodule build, 3. system paths
 highs_dir = ENV.fetch('HIGHS_DIR', nil)
@@ -27,7 +24,7 @@ if highs_dir
      (File.exist?(File.join(highs_lib, 'libhighs.so')) || File.exist?(File.join(highs_lib, 'libhighs.a')))
     $INCFLAGS += " -I#{highs_include}"
     $LDFLAGS += " -L#{highs_lib}"
-    $LIBS += " -lhighs #{std_lib}"
+    $LIBS += " -lhighs -lstdc++"
     $LOAD_PATH << highs_lib
     highs_found = true
   end
@@ -47,15 +44,15 @@ unless highs_found
       highs_include = File.join(highs_src, 'highs')
       $INCFLAGS += " -I#{highs_include} -I#{highs_build}"
     else
-      # Precompiled tarball layout
+      # Precompiled tarball layout: headers under include/highs/
       highs_config_inc = File.join(highs_build, 'include', 'highs')
       if File.exist?(File.join(highs_config_inc, 'HConfig.h'))
-        $INCFLAGS += " -I#{File.join(highs_build, 'include')}"
+        $INCFLAGS += " -I#{highs_config_inc}"
       end
     end
 
-    $LDFLAGS += " -L#{highs_lib} -Wl,-rpath,#{is_darwin ? '@loader_path/../..' : '$ORIGIN'}"
-    $LIBS += " -lhighs #{std_lib}"
+    $LDFLAGS += " -L#{highs_lib}"
+    $LIBS += " -lhighs -lstdc++"
     $LOAD_PATH << highs_lib
     highs_found = true
   end
